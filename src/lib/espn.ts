@@ -12,7 +12,6 @@ export const urls = {
   scoreboard: (q?: { year: number; type: number; week: number }) =>
     q ? `${SITE}/scoreboard?dates=${q.year}&seasontype=${q.type}&week=${q.week}` : `${SITE}/scoreboard`,
   summary: (id: string) => `${SITE}/summary?event=${id}`,
-  team: (id: string) => `${SITE}/teams/${id}`,
   schedule: (id: string) => `${SITE}/teams/${id}/schedule`,
   roster: (id: string) => `${SITE}/teams/${id}/roster`,
   teamStats: (id: string) => `${SITE}/teams/${id}/statistics`,

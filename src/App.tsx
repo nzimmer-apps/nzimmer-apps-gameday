@@ -12,7 +12,11 @@ import { Team } from './pages/Team';
 
 function ScrollTop() {
   const { pathname } = useLocation();
-  useEffect(() => window.scrollTo(0, 0), [pathname]);
+  useEffect(() => {
+    // Braces matter: newer Chrome returns a Promise from scrollTo, and React treats an effect's
+    // return value as its cleanup function, which crashed every screen change.
+    window.scrollTo(0, 0);
+  }, [pathname]);
   return null;
 }
 

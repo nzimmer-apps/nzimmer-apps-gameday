@@ -2,7 +2,7 @@ import { Link, useParams } from 'react-router-dom';
 import { Crumbs, ErrorBox, Loading, PlayerLink, Section, StatTable, Tabs, TeamLink, fmtDate, fmtTime, teamCrumbs, useTab } from '../components/ui';
 import { statusState, urls } from '../lib/espn';
 import { toggleFavorite, useEspn, useSettings } from '../lib/hooks';
-import { divisionEntries, useLeague } from '../lib/league';
+import { divisionEntries, entryStat, useLeague } from '../lib/league';
 import { StandingsTable } from './Standings';
 
 const TABS = ['schedule', 'roster', 'stats', 'division'];
@@ -11,14 +11,17 @@ export function Team() {
   const { abbr = '' } = useParams();
   const league = useLeague();
   const t = league.byAbbr[abbr.toUpperCase()];
-  const info = useEspn(t ? urls.team(t.id) : null);
   const [tab, setTab] = useTab(TABS);
   const { favorites } = useSettings();
 
   if (!league.ready) return <Loading />;
   if (!t) return <p className="muted">No team "{abbr}". <Link to="/nfl">All teams</Link></p>;
-  const team = info.data?.team;
   const fav = favorites.includes(t.abbr);
+  // Record and division place come from standings: ESPN's single-team endpoint sends no CORS header.
+  const divEntries = t.conf && t.div ? divisionEntries(league.standings, t.conf, t.div) : [];
+  const place = divEntries.findIndex((e) => String(e.team?.id) === t.id);
+  const record = place >= 0 ? entryStat(divEntries[place], 'overall') : '';
+  const ord = (n: number) => ['1st', '2nd', '3rd', '4th'][n] || `${n + 1}th`;
 
   return (
     <div>
@@ -28,8 +31,8 @@ export function Team() {
         <div>
           <h1>{t.name}</h1>
           <div className="th-sub">
-            {team?.record?.items?.[0]?.summary}
-            {team?.standingSummary ? ` · ${team.standingSummary}` : ''}
+            {record}
+            {place >= 0 && t.conf && t.div ? ` · ${ord(place)} in ${t.conf.toUpperCase()} ${t.div[0].toUpperCase() + t.div.slice(1)}` : ''}
           </div>
           {t.conf && t.div && (
             <Link className="th-div" to={`/nfl/${t.conf}/${t.div}`}>
