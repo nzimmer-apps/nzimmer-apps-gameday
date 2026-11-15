@@ -296,15 +296,35 @@ table.versus tr.group td { text-align: left; font-weight: 700; font-size: 12px; 
 
 /* award race */
 .award { margin: 12px 0; }
-.award h2 { font-size: 16px; margin-bottom: 6px; }
-.award-list { list-style: none; margin: 0 0 6px; padding: 0; }
-.aw-row { display: grid; grid-template-columns: 18px 40px 1fr auto; gap: 8px; align-items: center; padding: 8px 2px; border-top: 1px solid var(--line); }
-.aw-row.lead { background: color-mix(in srgb, var(--accent-2) 14%, transparent); border-radius: 8px; border-top-color: transparent; }
-.aw-rank { color: var(--muted); font-size: 12px; text-align: center; font-weight: 700; }
-.aw-face { width: 40px; height: 30px; object-fit: cover; object-position: top; border-radius: 6px; background: var(--chip); display: inline-block; }
-.aw-who { min-width: 0; }
-.aw-name { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
-.aw-team { margin-left: 2px; }
-.aw-val { display: flex; flex-direction: column; align-items: flex-end; font-variant-numeric: tabular-nums; }
+.award h2 { font-size: 16px; margin-bottom: 8px; }
+.award details { margin-top: 8px; }
+.view-pick { display: flex; align-items: center; gap: 8px; }
+.aw-cell { display: flex; flex-direction: column; line-height: 1.2; }
+.aw-sub { display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; color: var(--muted); font-weight: 400; }
 a.chip { color: inherit; display: inline-block; }
 a.chip.on { color: #fff; }
+
+.race { display: flex; flex-direction: column; gap: 12px; }
+.lane { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center; }
+.lane-who { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 14px; }
+.lane-who a { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lane-v { font-weight: 800; font-variant-numeric: tabular-nums; }
+.rail { grid-column: 1 / -1; height: 12px; border-radius: 6px; background: var(--chip); position: relative; overflow: hidden; }
+.fill { position: absolute; inset: 0 auto 0 0; border-radius: 6px; background: var(--tc, var(--link)); }
+.fill::after { content: ''; position: absolute; right: 2px; top: 2px; width: 8px; height: 8px; border-radius: 50%; background: #fff; opacity: 0.9; }
+.race-foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 12px; }
+@media (prefers-reduced-motion: no-preference) { .fill { transition: width 0.4s ease; } }
+
+table.h2h { border-collapse: collapse; width: 100%; table-layout: fixed; min-width: 320px; font-variant-numeric: tabular-nums; }
+.h2h th { padding: 10px 4px 8px; vertical-align: bottom; font-weight: 500; font-size: 13px; text-align: center; }
+.h2h th:first-child { width: 70px; }
+.h2h th > a { display: block; line-height: 1.2; }
+.h2h th .aw-sub { justify-content: center; display: flex; }
+.h2h th.lead { background: color-mix(in srgb, var(--accent-2) 16%, transparent); }
+.h2h-face { width: 60px; height: 44px; object-fit: cover; object-position: top; border-radius: 6px; background: var(--chip); display: block; margin: 0 auto 4px; }
+.h2h td { text-align: center; padding: 7px 4px; border-top: 1px solid var(--line); font-weight: 600; }
+.h2h td.lab { text-align: left; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: var(--muted); padding-left: 10px; }
+.h2h td.best { color: var(--link); font-weight: 800; }
+.h2h .mini { display: block; height: 4px; margin: 3px auto 0; max-width: 56px; border-radius: 2px; background: var(--chip); overflow: hidden; }
+.h2h .mini i { display: block; height: 100%; background: currentColor; opacity: 0.55; }
+.h2h-more { padding: 0 10px 8px; margin: 0; }
