@@ -44,7 +44,7 @@ export function Awards() {
     // The sort key needs "defensiveInterceptions" (capital I) even though the data calls it "defensiveinterceptions".
     useEspn(u('defense', 'defensiveInterceptions.interceptions', 40), TEN_MIN),
     useEspn(u('defense', 'defensive.totalTackles', 40), TEN_MIN),
-    useEspn(u('defense', 'general.fumblesForced', 40), TEN_MIN),
+    // (Sorting by general.fumblesForced returns an empty list, so forced fumbles come from the lists above.)
   ];
   const fut = useEspn(year ? urls.futures(year) : null, TEN_MIN);
 
@@ -52,9 +52,9 @@ export function Awards() {
   if (failed) return <ErrorBox error={failed.error!} retry={failed.reload} />;
   if (!year || qs.some((q) => !q.data)) return <Loading what="Loading the award race" />;
 
-  const [pass, rush, recv, sacks, ints, tkl, ff] = qs.map((q) => readByAthlete(q.data));
+  const [pass, rush, recv, sacks, ints, tkl] = qs.map((q) => readByAthlete(q.data));
   const offense = mergeAthletes(pass, rush, recv);
-  const defense = mergeAthletes(sacks, ints, tkl, ff);
+  const defense = mergeAthletes(sacks, ints, tkl);
   const everyone = mergeAthletes(offense, defense);
   const isRookie = (a: Athlete) => rookieSeason === year && !!rookieInfo(a.id);
 
