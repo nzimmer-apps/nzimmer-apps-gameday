@@ -284,6 +284,7 @@ table.versus tr.group td { text-align: left; font-weight: 700; font-size: 12px; 
 
 @media (max-width: 420px) {
   .games { grid-template-columns: 1fr; }
+  table.stats.dense th, table.stats.dense td { padding: 6px 5px; }
   .sh-score { font-size: 28px; }
 }
 

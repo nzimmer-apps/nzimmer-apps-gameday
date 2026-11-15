@@ -358,7 +358,6 @@ const CAT_TITLES: Record<string, string> = {
   passing: 'Passing',
   rushing: 'Rushing',
   receiving: 'Receiving',
-  fumbles: 'Fumbles',
   defensive: 'Defense',
   interceptions: 'Interceptions',
   kickReturns: 'Kick returns',
@@ -366,6 +365,10 @@ const CAT_TITLES: Record<string, string> = {
   kicking: 'Kicking',
   punting: 'Punting',
 };
+
+// Tables that get each ball carrier's FUM / LOST columns, and the one that gets recoveries.
+const CARRIER_CATS = ['passing', 'rushing', 'receiving', 'kickReturns', 'puntReturns'];
+const RECOVERY_CAT = 'defensive';
 
 function BoxTab({ ctx }: { ctx: Ctx }) {
   const teams: any[] = ctx.d.boxscore?.players || [];
@@ -375,12 +378,49 @@ function BoxTab({ ctx }: { ctx: Ctx }) {
   const team = ordered.find((t) => String(t.team?.id) === side) || ordered[0];
   if (!team) return <p className="muted">Box score shows up once the game starts.</p>;
 
+  const cats: any[] = team.statistics || [];
+  // ESPN puts fumbles in their own table (FUM, LOST, REC). Fold them into the tables above instead.
+  const fumCat = cats.find((c) => c.name === 'fumbles');
+  const fl: string[] = fumCat?.labels || [];
+  const iFum = fl.indexOf('FUM');
+  const iLost = fl.indexOf('LOST');
+  const iRec = fl.indexOf('REC');
+  const fum = new Map<string, string[]>();
+  for (const a of fumCat?.athletes || []) fum.set(String(a.athlete?.id), a.stats || []);
+  const pick = (id: string, i: number) => (i >= 0 ? fum.get(id)?.[i] ?? '0' : '');
+
+  const inCarrierTable = new Set<string>();
+  for (const c of cats) if (CARRIER_CATS.includes(c.name)) for (const a of c.athletes || []) inCarrierTable.add(String(a.athlete?.id));
+  // Anyone who fumbled but isn't in a carrier table (a snapper, a defender after a takeaway) still gets listed.
+  const others = (fumCat?.athletes || []).filter((a: any) => !inCarrierTable.has(String(a.athlete?.id)) && Number(a.stats?.[iFum] || 0) > 0);
+
+  const extraCols = (catName: string) => {
+    if (!fumCat) return [];
+    const id = (a: any) => String(a.athlete?.id);
+    if (CARRIER_CATS.includes(catName))
+      return [
+        { key: 'fum', label: 'FUM', title: 'Fumbles (all plays this game)', value: (a: any) => Number(pick(id(a), iFum)), render: (a: any) => pick(id(a), iFum) },
+        { key: 'lost', label: 'LOST', title: 'Fumbles lost', value: (a: any) => Number(pick(id(a), iLost)), render: (a: any) => pick(id(a), iLost) },
+      ];
+    if (catName === RECOVERY_CAT && iRec >= 0)
+      return [{ key: 'rec', label: 'FR', title: 'Fumbles recovered', value: (a: any) => Number(pick(id(a), iRec)), render: (a: any) => pick(id(a), iRec) }];
+    return [];
+  };
+
   return (
     <div>
       <Chips options={ordered.map((t) => ({ v: String(t.team?.id), label: t.team?.displayName }))} value={side} onChange={setSide} />
-      {(team.statistics || []).map((cat: any) => {
+      {cats.map((cat: any) => {
+        if (cat.name === 'fumbles') return null;
         const labels: string[] = cat.labels || [];
         if (!cat.athletes?.length) return null;
+        const extra = extraCols(cat.name);
+        // Put fumbles right after INT (passing) or TD so they're visible without swiping on a phone.
+        const base = labels.map((l, i) => ({ key: `s${i}`, label: l, title: cat.descriptions?.[i], value: (a: any) => a.stats?.[i], render: (a: any) => a.stats?.[i] }));
+        const anchor = labels.includes('INT') ? labels.indexOf('INT') : labels.indexOf('TD');
+        const at = extra.length && anchor >= 0 ? anchor + 1 : base.length;
+        const statCols = [...base.slice(0, at), ...extra, ...base.slice(at)];
+        const totals = cat.totals?.length ? [...cat.totals.slice(0, at), ...extra.map(() => ''), ...cat.totals.slice(at)] : null;
         return (
           <Section key={cat.name} title={CAT_TITLES[cat.name] || cat.text || cat.name}>
             <StatTable
@@ -389,13 +429,32 @@ function BoxTab({ ctx }: { ctx: Ctx }) {
               rowKey={(a: any, i) => `${a.athlete?.id}-${i}`}
               cols={[
                 { key: 'name', label: 'Player', left: true, value: (a: any) => a.athlete?.displayName, render: (a: any) => <PlayerLink id={a.athlete?.id} name={a.athlete?.displayName} /> },
-                ...labels.map((l, i) => ({ key: `s${i}`, label: l, title: cat.descriptions?.[i], value: (a: any) => a.stats?.[i], render: (a: any) => a.stats?.[i] })),
+                ...statCols,
               ]}
-              totals={cat.totals?.length ? ['Team', ...cat.totals] : undefined}
+              totals={totals ? ['Team', ...totals] : undefined}
             />
           </Section>
         );
       })}
+      {others.length > 0 && (
+        <Section title="Other fumbles">
+          <StatTable
+            dense
+            rows={others}
+            rowKey={(a: any) => String(a.athlete?.id)}
+            cols={[
+              { key: 'name', label: 'Player', left: true, render: (a: any) => <PlayerLink id={a.athlete?.id} name={a.athlete?.displayName} /> },
+              ...fl.map((l, i) => ({ key: `f${i}`, label: l, render: (a: any) => a.stats?.[i] })),
+            ]}
+          />
+        </Section>
+      )}
+      {fumCat?.totals && (
+        <p className="small muted">
+          Team fumbles: {fumCat.totals[iFum]} · lost: {fumCat.totals[iLost]}. A player's FUM counts every play, so a QB who fumbles shows it in both Passing and
+          Rushing.
+        </p>
+      )}
     </div>
   );
 }
