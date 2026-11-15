@@ -147,28 +147,57 @@ function Roster({ teamId }: { teamId: string }) {
   );
 }
 
+// Order and titles for the stat groups; anything new ESPN adds goes at the end under its own name.
+const STAT_GROUPS: [string, string][] = [
+  ['passing', 'Passing'],
+  ['rushing', 'Rushing'],
+  ['receiving', 'Receiving'],
+  ['general', 'Fumbles & penalties'],
+  ['miscellaneous', 'Downs, red zone & turnovers'],
+  ['defensive', 'Defense'],
+  ['defensiveInterceptions', 'Interceptions'],
+  ['scoring', 'Scoring'],
+  ['kicking', 'Kicking'],
+  ['punting', 'Punting'],
+  ['returning', 'Returns'],
+];
+
 function TeamSeasonStats({ teamId }: { teamId: string }) {
-  const q = useEspn(urls.teamStats(teamId));
+  const league = useLeague();
+  const year: number | undefined = league.standings?.season?.year;
+  const q = useEspn(year ? urls.teamStats(teamId, year) : null);
   if (q.error && !q.data) return <ErrorBox error={q.error} retry={q.reload} />;
   if (!q.data) return <Loading what="Loading team stats" />;
-  const cats: any[] = q.data.results?.stats?.categories || [];
+  const cats: any[] = q.data.splits?.categories || [];
+  const order = (name: string) => {
+    const i = STAT_GROUPS.findIndex(([n]) => n === name);
+    return i < 0 ? 99 : i;
+  };
   return (
     <div>
-      {cats.map((c) => (
-        <Section key={c.name} title={c.displayName}>
-          <StatTable
-            dense
-            rows={c.stats || []}
-            rowKey={(s: any) => s.name}
-            sortable={false}
-            cols={[
-              { key: 'label', label: 'Stat', left: true, render: (s: any) => <span title={s.description}>{s.displayName}</span> },
-              { key: 'v', label: 'Value', highlight: true, render: (s: any) => s.displayValue },
-              { key: 'rk', label: 'NFL rank', render: (s: any) => s.rankDisplayValue || '' },
-            ]}
-          />
-        </Section>
-      ))}
+      <p className="small muted">{year} regular season. Rank is among all 32 teams (T = tied). Tap a column to sort.</p>
+      {[...cats]
+        .sort((a, b) => order(a.name) - order(b.name))
+        .map((c) => (
+          <Section key={c.name} title={STAT_GROUPS.find(([n]) => n === c.name)?.[1] || c.displayName}>
+            <StatTable
+              dense
+              rows={c.stats || []}
+              rowKey={(s: any) => s.name}
+              cols={[
+                { key: 'label', label: 'Stat', left: true, value: (s: any) => s.displayName, render: (s: any) => <span title={s.description}>{s.displayName}</span> },
+                { key: 'v', label: 'Total', highlight: true, value: (s: any) => s.value, render: (s: any) => s.displayValue },
+                {
+                  key: 'rk',
+                  label: 'NFL rank',
+                  value: (s: any) => (s.rank ? -s.rank : undefined),
+                  // No good/bad coloring: for some stats (fumbles, INTs thrown) ESPN's 1st means the most.
+                  render: (s: any) => String(s.rankDisplayValue || '').replace('Tied-', 'T-'),
+                },
+              ]}
+            />
+          </Section>
+        ))}
     </div>
   );
 }

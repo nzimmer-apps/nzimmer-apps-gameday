@@ -7,6 +7,7 @@ export const LEAGUE = 'nfl';
 const SITE = `https://site.api.espn.com/apis/site/v2/sports/${SPORT}/${LEAGUE}`;
 const SITE_V2 = `https://site.api.espn.com/apis/v2/sports/${SPORT}/${LEAGUE}`;
 const WEB = `https://site.web.api.espn.com/apis`;
+const CORE = `https://sports.core.api.espn.com/v2/sports/${SPORT}/leagues/${LEAGUE}`;
 
 export const urls = {
   scoreboard: (q?: { year: number; type: number; week: number }) =>
@@ -14,7 +15,8 @@ export const urls = {
   summary: (id: string) => `${SITE}/summary?event=${id}`,
   schedule: (id: string) => `${SITE}/teams/${id}/schedule`,
   roster: (id: string) => `${SITE}/teams/${id}/roster`,
-  teamStats: (id: string) => `${SITE}/teams/${id}/statistics`,
+  // Regular-season team stats with NFL ranks (the site API's team statistics have no ranks).
+  teamStats: (id: string, year: number) => `${CORE}/seasons/${year}/types/2/teams/${id}/statistics`,
   standings: () => `${SITE_V2}/standings?level=3`,
   leaders: () => `${WEB}/site/v3/sports/${SPORT}/${LEAGUE}/leaders`,
   athlete: (id: string) => `${WEB}/common/v3/sports/${SPORT}/${LEAGUE}/athletes/${id}`,
