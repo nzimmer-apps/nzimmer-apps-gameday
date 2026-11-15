@@ -19,6 +19,7 @@ describe('parseFumble', () => {
       recoveredBy: 'A.Van Ginkel',
       recoveredTeam: 'MIN',
       lost: true,
+      team: 'GB',
     });
   });
 

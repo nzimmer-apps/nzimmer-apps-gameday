@@ -5,6 +5,8 @@ import { stat, statusState, urls } from '../lib/espn';
 import { useEspn } from '../lib/hooks';
 import { useLeague } from '../lib/league';
 import { describeTurnover, finalPlayText, parseTurnovers, type TurnoverInfo } from '../lib/turnovers';
+import { nameKeys, toPlayIn, type PlayIn } from '../lib/splits';
+import { SplitBox, SplitPicker, SplitTeamStats, useSplit, type SplitTeam } from './GameSplits';
 
 const TABS = ['summary', 'box', 'plays', 'stats', 'odds'];
 const TAB_LABELS = { summary: 'Summary', box: 'Box score', plays: 'Plays', stats: 'Team stats', odds: 'Win %' };
@@ -16,6 +18,11 @@ type Ctx = {
   nameToId: Map<string, string>;
   nameRe: RegExp | null;
   plays: any[]; // every play in order, each with ._drive
+  playIns: PlayIn[]; // the same plays in the shape the quarter-split stats need
+  teams: SplitTeam[];
+  idName: Map<string, string>;
+  maxPeriod: number;
+  linescores: Record<string, number[]>;
 };
 
 export function Game() {
@@ -34,14 +41,17 @@ export function Game() {
 
     // Play text uses "J.Love"; map that form to athlete ids so names become links.
     const nameToId = new Map<string, string>();
+    const idName = new Map<string, string>();
     for (const team of d.boxscore?.players || [])
       for (const cat of team.statistics || [])
         for (const a of cat.athletes || []) {
           const at = a.athlete;
           if (!at?.firstName || !at?.lastName) continue;
-          nameToId.set(`${at.firstName[0]}.${at.lastName}`, String(at.id));
-          nameToId.set(`${at.firstName.slice(0, 2)}.${at.lastName}`, String(at.id));
-          if (at.displayName) nameToId.set(at.displayName, String(at.id));
+          for (const k of nameKeys(at)) nameToId.set(k, String(at.id));
+          if (at.displayName) {
+            nameToId.set(at.displayName, String(at.id));
+            idName.set(String(at.id), at.displayName);
+          }
         }
     const keys = [...nameToId.keys()].sort((a, b) => b.length - a.length).map((k) => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
     const nameRe = keys.length ? new RegExp(`(?<![A-Za-z])(${keys.join('|')})(?![a-z])`, 'g') : null;
@@ -58,8 +68,17 @@ export function Game() {
         seen.add(k);
         return true;
       });
-    return { d, home, away, nameToId, nameRe, plays };
+    const sides = [away, home].filter(Boolean);
+    const abbrOf = (id?: string) => sides.find((c: any) => String(c.team?.id) === String(id))?.team?.abbreviation;
+    const otherOf = (ab?: string) => sides.find((c: any) => c.team?.abbreviation !== ab)?.team?.abbreviation;
+    const playIns = plays.map((p: any) => toPlayIn(p, abbrOf, otherOf));
+    const teams: SplitTeam[] = sides.map((c: any) => ({ id: String(c.team?.id), abbr: c.team?.abbreviation, name: c.team?.displayName, home: c.homeAway === 'home' }));
+    const maxPeriod = Math.max(0, ...plays.map((p: any) => p.period?.number || 0));
+    const linescores: Record<string, number[]> = {};
+    for (const c of sides) linescores[c.team?.abbreviation] = (c.linescores || []).map((l: any) => Number(l.displayValue) || 0);
+    return { d, home, away, nameToId, nameRe, plays, playIns, teams, idName, maxPeriod, linescores };
   }, [d]);
+  const [split, setSplit, splitOptions] = useSplit(ctx?.maxPeriod || 0);
 
   if (first.error && !d) return <ErrorBox error={first.error} retry={first.reload} />;
   if (!d || !ctx) return <Loading what="Loading game" />;
@@ -78,9 +97,11 @@ export function Game() {
       <ScoreHeader ctx={ctx} />
       <Tabs tabs={TABS} labels={TAB_LABELS} value={tab} onChange={setTab} />
       {tab === 'summary' && <SummaryTab ctx={ctx} />}
-      {tab === 'box' && <BoxTab ctx={ctx} />}
+      {(tab === 'box' || tab === 'stats') && <SplitPicker split={split} setSplit={setSplit} options={splitOptions} />}
+      {tab === 'box' && (split === 'all' ? <BoxTab ctx={ctx} /> : <SplitBox plays={ctx.playIns} teams={ctx.teams} split={split} names={ctx} />)}
       {tab === 'plays' && <PlaysTab ctx={ctx} />}
-      {tab === 'stats' && <TeamStatsTab ctx={ctx} />}
+      {tab === 'stats' &&
+        (split === 'all' ? <TeamStatsTab ctx={ctx} /> : <SplitTeamStats plays={ctx.playIns} teams={ctx.teams} split={split} linescores={ctx.linescores} />)}
       {tab === 'odds' && <WinProbTab ctx={ctx} />}
     </div>
   );

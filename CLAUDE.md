@@ -16,6 +16,10 @@ on push to `main`. Personal use only; data is ESPN's unofficial public JSON API 
   `access-control-allow-origin`.
 - `src/lib/turnovers.ts` parses fumbles/interceptions from play text. Add a test in `turnovers.test.ts` with the
   real ESPN text for any new format. Its "lost" result should match the box score's `fumblesLost`.
+- Quarter/half splits (`?split=q1`) are rebuilt from play-by-play in `src/lib/splits.ts`; "Game" always shows ESPN's
+  official box score. After changing the parser, run `npx vite-node scripts/check-splits.mts <dir of summary JSONs>`
+  (save some finished games with `curl .../summary?event=<id>`) and make sure match rates don't drop; add a test in
+  `splits.test.ts` with the real play text for each new rule.
 - Every team or player name on screen should be a link (`TeamLink`, `PlayerLink`); tabs live in `?tab=`.
 - Routes are prefixed `nfl/` so another league can be added alongside.
 

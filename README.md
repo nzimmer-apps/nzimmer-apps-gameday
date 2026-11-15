@@ -13,6 +13,8 @@ It shows what Google's scoreboard leaves out, fumbles in particular:
 - **Play filters:** scoring, turnovers, penalties, big plays (20+ yards).
 - **Situational stats:** 3rd and 4th down, red zone, time of possession, penalties.
 - Player career tables include forced fumbles (FF) and fumble recoveries (FR).
+- **Quarter and half splits** on the Box score and Team stats tabs, rebuilt from the play-by-play
+  (the "Game" view is ESPN's official box score).
 
 Personal use only. Data comes from ESPN's public JSON feed, which is unofficial and can change. Not affiliated
 with ESPN or the NFL.

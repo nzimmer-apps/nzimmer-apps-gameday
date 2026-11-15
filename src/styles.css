@@ -288,3 +288,8 @@ table.versus tr.group td { text-align: left; font-weight: 700; font-size: 12px; 
   .sh-score { font-size: 28px; }
 }
 
+
+.split-picker { position: sticky; top: calc(env(safe-area-inset-top) + 44px); z-index: 5; background: var(--bg); padding: 2px 0; }
+.split-picker .chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 4px 0; }
+.split-picker .chip { flex: none; }
+.split-note { margin-top: 16px; }

@@ -5,7 +5,7 @@
 
 // "J.Love", "A.Van Ginkel", "A.St. Brown", "Am.Wright", "D.O'Neal", "J.Smith-Njigba"
 // A second word must look like a name ("Van", "Brown"), not an all-caps keyword ("INTERCEPTED", "GB").
-const NAME = String.raw`[A-Z][a-zA-Z]{0,2}\.\s?[A-Z][\w'\-]*(?:\.?\s(?:[A-Z][a-z][\w'\-]*))?`;
+export const NAME = String.raw`[A-Z][a-zA-Z]{0,2}\.\s?[A-Z][\w'\-]*(?:\.?\s(?:[A-Z][a-z][\w'\-]*))?`;
 
 export type FumbleInfo = {
   kind: 'fumble';
@@ -19,6 +19,8 @@ export type FumbleInfo = {
   outOfBounds?: boolean;
   /** fumbled out of the end zone: the other team gets the ball */
   touchback?: boolean;
+  /** team that had the ball when it came loose (when known) */
+  team?: string;
 };
 
 export type InterceptionInfo = {
@@ -41,7 +43,7 @@ export const normalizeTeamCode = (code: string) => PLAY_CODES[code.toUpperCase()
 export function finalPlayText(text: string): string {
   const i = text.lastIndexOf('REVERSED.');
   return (i >= 0 ? text.slice(i + 'REVERSED.'.length) : text)
-    .replace(new RegExp(String.raw`(?:${NAME}) reported in as eligible\.\s*`, 'g'), '')
+    .replace(new RegExp(String.raw`(?:${NAME}(?:,\s*|,? and ))*(?:${NAME}) reported in as eligible\.\s*`, 'g'), '')
     .replace(/^\s*\(\d{1,2}:\d{2}\)\s*/, '')
     .trim();
 }
@@ -84,6 +86,7 @@ export function parseFumbles(rawText: string, offenseAbbr?: string, defenseAbbr?
     const before = text.slice(segStart, at);
     const after = text.slice(at, hits[k + 1] ?? text.length);
     const info: FumbleInfo = { kind: 'fumble', muffed: after.startsWith('MUFFS') };
+    if (holder) info.team = holder.toUpperCase();
 
     const named = before.match(new RegExp(String.raw`(${NAME})\s+$`));
     if (named) info.fumbledBy = named[1];
