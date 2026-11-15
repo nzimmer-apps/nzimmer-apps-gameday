@@ -13,6 +13,8 @@ It shows what Google's scoreboard leaves out, fumbles in particular:
 - **Play filters:** scoring, turnovers, penalties, big plays (20+ yards).
 - **Situational stats:** 3rd and 4th down, red zone, time of possession, penalties.
 - Player career tables include forced fumbles (FF) and fumble recoveries (FR).
+- **Award race:** projected MVP (DraftKings odds), Offensive and Defensive Player of the Year and both Rookie of the
+  Year awards (stat-based scores, explained on the screen).
 - **Quarter and half splits** on the Box score and Team stats tabs, rebuilt from the play-by-play
   (the "Game" view is ESPN's official box score).
 
@@ -56,6 +58,7 @@ npm run build    # typecheck + production build in dist/
 | `#/nfl/team/gb?tab=roster` | Team: schedule, roster, stats, division |
 | `#/nfl/player/<id>` | Player: game log, career |
 | `#/nfl/leaders` | Stat leaders |
+| `#/nfl/awards` | Award race |
 | `#/settings` | My teams, theme |
 
 Every link starts with `nfl/` so basketball can be added later under `nba/`.

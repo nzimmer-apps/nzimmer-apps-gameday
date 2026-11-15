@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { HashRouter, Link, NavLink, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { useSettings } from './lib/hooks';
 import { LeagueProvider, useLeague } from './lib/league';
+import { Awards } from './pages/Awards';
 import { Game } from './pages/Game';
 import { Leaders } from './pages/Leaders';
 import { Player } from './pages/Player';
@@ -78,6 +79,7 @@ export default function App() {
             <Route path="/nfl/team/:abbr" element={<Team />} />
             <Route path="/nfl/player/:id" element={<Player />} />
             <Route path="/nfl/leaders" element={<Leaders />} />
+            <Route path="/nfl/awards" element={<Awards />} />
             <Route path="/nfl/:conf" element={<Conference />} />
             <Route path="/nfl/:conf/:div" element={<Division />} />
             <Route path="/settings" element={<Settings />} />

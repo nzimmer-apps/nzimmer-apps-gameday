@@ -20,6 +20,10 @@ on push to `main`. Personal use only; data is ESPN's unofficial public JSON API 
   official box score. After changing the parser, run `npx vite-node scripts/check-splits.mts <dir of summary JSONs>`
   (save some finished games with `curl .../summary?event=<id>`) and make sure match rates don't drop; add a test in
   `splits.test.ts` with the real play text for each new rule.
+- Award race (`src/lib/awards.ts`, `#/nfl/awards`): MVP from ESPN's DraftKings futures, other awards from published
+  scores over `statistics/byathlete` lists. Rookies come from bundled `src/lib/rookies.json`; regenerate it every year
+  after the draft with `scripts/gen-rookies.mjs` (the draft feed has no CORS header). byathlete sort keys are
+  case-sensitive and differ from the data: use `defensiveInterceptions.interceptions`.
 - Every team or player name on screen should be a link (`TeamLink`, `PlayerLink`); tabs live in `?tab=`.
 - Routes are prefixed `nfl/` so another league can be added alongside.
 

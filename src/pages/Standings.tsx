@@ -66,6 +66,7 @@ export function LeagueHome() {
         <Link to="/nfl/afc">AFC</Link>
         <Link to="/nfl/nfc">NFC</Link>
         <Link to="/nfl/leaders">Stat leaders</Link>
+        <Link to="/nfl/awards">Award race</Link>
         <Link to="/">Scores</Link>
       </div>
       <Chips

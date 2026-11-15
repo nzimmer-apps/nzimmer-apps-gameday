@@ -19,6 +19,11 @@ export const urls = {
   teamStats: (id: string, year: number) => `${CORE}/seasons/${year}/types/2/teams/${id}/statistics`,
   standings: () => `${SITE_V2}/standings?level=3`,
   leaders: () => `${WEB}/site/v3/sports/${SPORT}/${LEAGUE}/leaders`,
+  // Every player's season stats, one category per call (category e.g. "offense:passing", sort "passing.passingYards").
+  byAthlete: (category: string, sort: string, limit: number, year: number) =>
+    `${WEB}/common/v3/sports/${SPORT}/${LEAGUE}/statistics/byathlete?region=us&lang=en&contentorigin=espn&isqualified=false&season=${year}&seasontype=2&category=${encodeURIComponent(category)}&sort=${encodeURIComponent(sort + ':desc')}&limit=${limit}`,
+  // Sportsbook futures (MVP odds, Super Bowl, divisions) from ESPN's DraftKings feed.
+  futures: (year: number) => `${CORE}/seasons/${year}/futures?limit=100`,
   athlete: (id: string) => `${WEB}/common/v3/sports/${SPORT}/${LEAGUE}/athletes/${id}`,
   athleteStats: (id: string) => `${WEB}/common/v3/sports/${SPORT}/${LEAGUE}/athletes/${id}/stats`,
   gamelog: (id: string) => `${WEB}/common/v3/sports/${SPORT}/${LEAGUE}/athletes/${id}/gamelog`,

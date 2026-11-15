@@ -293,3 +293,18 @@ table.versus tr.group td { text-align: left; font-weight: 700; font-size: 12px; 
 .split-picker .chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin: 4px 0; }
 .split-picker .chip { flex: none; }
 .split-note { margin-top: 16px; }
+
+/* award race */
+.award { margin: 12px 0; }
+.award h2 { font-size: 16px; margin-bottom: 6px; }
+.award-list { list-style: none; margin: 0 0 6px; padding: 0; }
+.aw-row { display: grid; grid-template-columns: 18px 40px 1fr auto; gap: 8px; align-items: center; padding: 8px 2px; border-top: 1px solid var(--line); }
+.aw-row.lead { background: color-mix(in srgb, var(--accent-2) 14%, transparent); border-radius: 8px; border-top-color: transparent; }
+.aw-rank { color: var(--muted); font-size: 12px; text-align: center; font-weight: 700; }
+.aw-face { width: 40px; height: 30px; object-fit: cover; object-position: top; border-radius: 6px; background: var(--chip); display: inline-block; }
+.aw-who { min-width: 0; }
+.aw-name { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
+.aw-team { margin-left: 2px; }
+.aw-val { display: flex; flex-direction: column; align-items: flex-end; font-variant-numeric: tabular-nums; }
+a.chip { color: inherit; display: inline-block; }
+a.chip.on { color: #fff; }

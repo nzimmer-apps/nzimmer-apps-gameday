@@ -1,6 +1,7 @@
 import { Crumbs, ErrorBox, Loading, PlayerLink, TeamLink } from '../components/ui';
 import { urls } from '../lib/espn';
 import { useEspn, useSettings } from '../lib/hooks';
+import { LeaderTabs } from './Awards';
 
 export function Leaders() {
   const q = useEspn(urls.leaders(), 10 * 60_000);
@@ -12,6 +13,7 @@ export function Leaders() {
     <div>
       <Crumbs items={[{ label: 'Stat leaders' }]} />
       <h1 className="page-title">Stat leaders</h1>
+      <LeaderTabs on="leaders" />
       <p className="small muted">For fumbles, forced fumbles and recoveries, open a player's Career tab or a game's Turnovers list.</p>
       <div className="leaders-grid">
         {cats.map((c) => (
